@@ -8,4 +8,6 @@ export default {
   dbPassword: process.env.DB_PASSWORD,
   dbName: process.env.DB_NAME,
   dbHost: process.env.DB_HOST,
+  ossAccessKeyId: process.env.OSS_ACCESS_KEY_ID,
+  ossAccessKeySecret: process.env.OSS_ACCESS_KEY_SECRET,
 }

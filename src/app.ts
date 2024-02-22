@@ -1,7 +1,6 @@
 import express from "express"
 import loadApp from "./loaders/index.js"
 import config from "./config/index.js"
-
 async function startServer() {
   const app = express()
 
@@ -11,5 +10,4 @@ async function startServer() {
     console.log(`Server is listening on port ${config.port}`)
   })
 }
-
 startServer()
