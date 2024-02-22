@@ -5,6 +5,8 @@ WORKDIR /src
 EXPOSE 8080
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN npm install -g pnpm
+RUN pnpm config set registry https://registry.npmmirror.com
 RUN \
   [ -f pnpm-lock.yaml ] && pnpm install --ignore-scripts || \
   (echo "Lockfile not found." && exit 1)
