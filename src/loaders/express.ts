@@ -4,6 +4,8 @@ import express from "express"
 
 import MapRouter from "@/api/map.js"
 import UserRouter from "@/api/user.js"
+import ManageRouter from "@/api/manage.js"
+import ShareRouter from "@/api/share.js"
 export default async function (app: Application) {
   app.use("/public", express.static("public"))
 
@@ -27,4 +29,6 @@ export default async function (app: Application) {
 
   app.use("/api/map", MapRouter)
   app.use("/api/user", UserRouter)
+  app.use("/api/manage", ManageRouter)
+  app.use("/api/share", ShareRouter)
 }

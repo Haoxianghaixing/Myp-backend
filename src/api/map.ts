@@ -92,7 +92,7 @@ router.post("/uploadImage", upload.single("file"), (req: any, res) => {
 router.get("/getAreaDetailById", (req, res) => {
   // 解析 token 获取用户 id
   const { token } = req.cookies
-  const { id } = decodeToken(token)
+  const userInfo = decodeToken(token)
   const { areaId } = req.query as {
     areaId: string
   }
@@ -121,28 +121,35 @@ router.get("/getAreaDetailById", (req, res) => {
             return {
               fileName: item.fileName,
               areaId,
+              userId: item.userId,
               userName: item.name,
               uploadDate: item.uploadDate.toLocaleDateString(),
-              takeDate: item.takeDate.toLocaleDateString(),
+              takeDate: item.takeDate ? item.takeDate.toLocaleDateString() : "",
               spot: item.spot,
             }
           }),
-          userImgList: result
-            .filter((item) => item.userId === id)
-            .map((item) => {
-              return {
-                fileName: item.fileName,
-                areaId,
-                userName: item.name,
-                uploadDate: item.uploadDate.toLocaleDateString(),
-                takeDate: item.takeDate.toLocaleDateString(),
-                spot: item.spot,
-              }
-            }),
+          userImgList: userInfo
+            ? result
+                .filter((item) => item.userId === userInfo.id)
+                .map((item) => {
+                  return {
+                    fileName: item.fileName,
+                    userId: item.userId,
+                    areaId,
+                    userName: item.name,
+                    uploadDate: item.uploadDate.toLocaleDateString(),
+                    takeDate: item.takeDate
+                      ? item.takeDate.toLocaleDateString()
+                      : "",
+                    spot: item.spot,
+                  }
+                })
+            : [],
         } as AreaDetail,
       })
     })
     .catch((err) => {
+      console.log(err)
       res.json({
         code: 400,
         message: "获取地区详情失败",
@@ -196,6 +203,72 @@ router.get("/getAreaList", (req, res) => {
     message: "获取地区列表成功",
     data: AreaList,
   })
+})
+
+router.get("/getUserHotMap", (req, res) => {
+  const { token } = req.cookies
+  const { id } = decodeToken(token)
+  query(
+    "select areaId, count(*) as count from img where userId = ? group by areaId order by count desc",
+    [id]
+  )
+    .then((r) => {
+      const result = r as {
+        areaId: string
+        count: number
+      }[]
+      const data: {
+        [key: string]: {
+          count: number
+          children: {
+            [key: string]: {
+              count: number
+            }
+          }
+        }
+      } = {}
+      result.forEach((item) => {
+        if (item.areaId) {
+          let provinceId = ""
+          if (item.areaId.length === 2) {
+            provinceId = item.areaId
+            if (data[provinceId]) {
+              data[provinceId]!.count += item.count
+            } else {
+              data[provinceId] = {
+                count: item.count,
+                children: {},
+              }
+            }
+          } else {
+            provinceId = item.areaId.slice(0, 2)
+            if (data[provinceId]) {
+              data[provinceId]!.count += item.count
+            } else {
+              data[provinceId] = {
+                count: item.count,
+                children: {},
+              }
+            }
+            data[provinceId]!.children[item.areaId] = {
+              count: item.count,
+            }
+          }
+        }
+      })
+      res.json({
+        code: 200,
+        message: "获取用户热图成功",
+        data,
+      })
+    })
+    .catch((err) => {
+      console.log(err)
+      res.json({
+        code: 400,
+        message: "获取用户热图失败",
+      })
+    })
 })
 
 export default router

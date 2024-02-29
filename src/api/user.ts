@@ -24,7 +24,11 @@ function generateToken(userInfo: UserInfo) {
 }
 
 export function decodeToken(token: string) {
-  return jwt.verify(token, SECRET_KEY)
+  try {
+    return jwt.verify(token, SECRET_KEY)
+  } catch (e) {
+    return null
+  }
 }
 
 router.get("/getUserInfo", (req, res) => {
