@@ -33,18 +33,50 @@ export function decodeToken(token: string) {
 
 router.get("/getUserDetail", (req, res) => {
   const { id } = req.query
-  query("SELECT *, name as userName FROM img  WHERE userId = ?", [id]).then(
-    (r) => {
-      res.send(
-        JSON.stringify({
-          code: 200,
-          data: {
-            photoList: r,
-          },
-        })
-      )
-    }
-  )
+  query("SELECT name, email, id FROM user WHERE id = ?", [id]).then((r) => {
+    res.send(
+      JSON.stringify({
+        code: 200,
+        data: (r as UserInfo[])[0],
+      })
+    )
+  })
+})
+
+router.get("/getUserPhotos", (req, res) => {
+  const { id } = req.query
+  query(
+    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id WHERE userId = ?",
+    [id]
+  ).then((r) => {
+    res.send(
+      JSON.stringify({
+        code: 200,
+        data: {
+          photoList: r,
+        },
+      })
+    )
+  })
+})
+
+router.get("/getUserLikes", (req, res) => {
+  const { id } = req.query as {
+    id: string
+  }
+  query(
+    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE id = ? AND t.l = 1",
+    [id]
+  ).then((r) => {
+    res.send(
+      JSON.stringify({
+        code: 200,
+        data: {
+          photoList: r,
+        },
+      })
+    )
+  })
 })
 
 router.get("/getUserInfo", (req, res) => {

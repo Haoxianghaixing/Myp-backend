@@ -8,8 +8,7 @@ import ManageRouter from "@/api/manage.js"
 import ShareRouter from "@/api/share.js"
 export default async function (app: Application) {
   app.use("/public", express.static("public"))
-
-  // 配置跨域
+  // 设置跨域
   app.use(
     cors({
       origin: "*",

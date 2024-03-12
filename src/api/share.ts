@@ -3,7 +3,7 @@ import express from "express"
 import cookieParser from "cookie-parser"
 import { decodeToken } from "./user.js"
 import oss from "@/service/oss.js"
-import fs from "fs/promises"
+import fs from "node:fs"
 import { fileBufferPath } from "@/constant/index.js"
 const router = express.Router()
 
@@ -120,15 +120,19 @@ router.get("/downloadPhoto", (req, res) => {
       oss
         .downloadFileFromOSS(fileName, `./public/fileBuffer/${oriFileName}`)
         .then(() => {
-          res.send({
-            code: 200,
-            message: "下载成功",
-            data: fileBufferPath + "/" + oriFileName,
+          res.writeHead(200, {
+            "Content-Type": "application/force-stream",
+            "Content-Disposition": `attachment; filename=${oriFileName}`,
           })
+          fs.createReadStream(`./public/fileBuffer/${oriFileName}`)
+            .pipe(res)
+            .on("finish", () => {
+              query(
+                "UPDATE img SET downloads = downloads + 1 WHERE photoId = ?",
+                [photoId]
+              )
+            })
         })
-      query("UPDATE img SET downloads = downloads + 1 WHERE photoId = ?", [
-        photoId,
-      ])
     })
     .catch((e) => {
       console.log(e)
