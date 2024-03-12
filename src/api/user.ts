@@ -31,6 +31,22 @@ export function decodeToken(token: string) {
   }
 }
 
+router.get("/getUserDetail", (req, res) => {
+  const { id } = req.query
+  query("SELECT *, name as userName FROM img  WHERE userId = ?", [id]).then(
+    (r) => {
+      res.send(
+        JSON.stringify({
+          code: 200,
+          data: {
+            photoList: r,
+          },
+        })
+      )
+    }
+  )
+})
+
 router.get("/getUserInfo", (req, res) => {
   const token = req.cookies.token
   if (token) {

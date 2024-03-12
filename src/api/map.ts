@@ -62,6 +62,7 @@ router.post("/uploadImage", upload.single("file"), (req: any, res) => {
   const { file } = req as {
     file: multer.File
   }
+  console.log(file)
   const { path: filePath, filename: originFileName } = file
   const fileType = originFileName.split(".")[1]
   const imgId = randomUUID()
@@ -96,14 +97,14 @@ router.get("/getAreaDetailById", (req, res) => {
   const { areaId } = req.query as {
     areaId: string
   }
-
   query(
-    "select userId, fileName, uploadDate, name, takeDate, spot from img join user on img.userId = user.id where areaId like ? order by uploadDate desc",
+    "select userId, photoId, fileName, uploadDate, name, takeDate, spot from img join user on img.userId = user.id where areaId like ? order by uploadDate desc",
     [`${areaId}%`]
   )
     .then((r) => {
       const result = r as {
         userId: number
+        photoId: string
         name: string
         fileName: string
         uploadDate: Date
@@ -120,6 +121,7 @@ router.get("/getAreaDetailById", (req, res) => {
           areaImgList: result.slice(0, 5).map((item) => {
             return {
               fileName: item.fileName,
+              photoId: item.photoId,
               areaId,
               userId: item.userId,
               userName: item.name,
@@ -135,6 +137,7 @@ router.get("/getAreaDetailById", (req, res) => {
                   return {
                     fileName: item.fileName,
                     userId: item.userId,
+                    photoId: item.photoId,
                     areaId,
                     userName: item.name,
                     uploadDate: item.uploadDate.toLocaleDateString(),
@@ -168,18 +171,17 @@ router.post("/addRecord", (req, res) => {
   const { id } = decodeToken(token)
   const uploadDate = new Date().toLocaleDateString()
   query(
-    "insert into img (userId, areaId, fileName, uploadDate, takeDate, spot) values ?",
+    "insert into img (userId, areaId, fileName, uploadDate, takeDate, spot, photoId) values ?",
     [
-      fileList.map((fileName) => {
-        return [
-          id,
-          areaId,
-          fileName,
-          uploadDate,
-          takeDate ? takeDate : null,
-          spot,
-        ]
-      }),
+      fileList.map((fileName) => [
+        id,
+        areaId,
+        fileName,
+        uploadDate,
+        takeDate ? takeDate : null,
+        spot,
+        fileName.split("/")[2]!.split(".")[0],
+      ]),
     ]
   )
     .then((r) => {
