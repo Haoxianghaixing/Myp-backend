@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import { decodeToken } from "./user.js"
 import oss from "@/service/oss.js"
 import fs from "fs/promises"
+import { fileBufferPath } from "@/constant/index.js"
 const router = express.Router()
 
 router.use(cookieParser())
@@ -116,16 +117,14 @@ router.get("/downloadPhoto", (req, res) => {
     .then((r) => {
       const fileName = (r as any)[0].fileName
       const oriFileName = fileName.split("/")[2]
-      // res.sendFile(`http://101.200.238.139/oss/${fileName}`)
       oss
         .downloadFileFromOSS(fileName, `./public/fileBuffer/${oriFileName}`)
         .then(() => {
-          res.download(`./public/fileBuffer/${oriFileName}`, oriFileName)
-          // res.send({
-          //   code: 200,
-          //   message: "下载成功",
-          //   data: `http://localhost:3000/fileBuffer/${oriFileName}`,
-          // })
+          res.send({
+            code: 200,
+            message: "下载成功",
+            data: fileBufferPath + "/" + oriFileName,
+          })
         })
       query("UPDATE img SET downloads = downloads + 1 WHERE photoId = ?", [
         photoId,
