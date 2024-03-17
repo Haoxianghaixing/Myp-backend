@@ -169,7 +169,7 @@ router.post("/addRecord", (req, res) => {
   }
   const { token } = req.cookies
   const { id } = decodeToken(token)
-  const uploadDate = new Date().toDateString()
+  const uploadDate = new Date()
   query(
     "insert into img (userId, areaId, fileName, uploadDate, takeDate, spot, photoId) values ?",
     [
