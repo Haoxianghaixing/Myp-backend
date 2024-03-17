@@ -80,6 +80,7 @@ router.post("/uploadImage", upload.single("file"), (req: any, res) => {
       res.json({
         code: 400,
         message: "上传失败",
+        err: err,
       })
     })
 })
