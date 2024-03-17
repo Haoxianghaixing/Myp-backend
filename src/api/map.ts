@@ -191,10 +191,10 @@ router.post("/addRecord", (req, res) => {
       })
     })
     .catch((err) => {
-      console.log(err)
       res.json({
         code: 400,
         message: "添加记录失败",
+        err,
       })
     })
 })
