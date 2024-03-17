@@ -164,7 +164,7 @@ router.post("/addRecord", (req, res) => {
   const { areaId, fileList, takeDate, spot } = req.body as {
     areaId: string
     fileList: string[]
-    takeDate?: string
+    takeDate?: Date
     spot?: string
   }
   const { token } = req.cookies
@@ -179,7 +179,7 @@ router.post("/addRecord", (req, res) => {
         fileName,
         uploadDate,
         takeDate ? takeDate : null,
-        spot,
+        spot ?? null,
         fileName.split("/")[2]!.split(".")[0],
       ]),
     ]
@@ -191,6 +191,7 @@ router.post("/addRecord", (req, res) => {
       })
     })
     .catch((err) => {
+      console.log(err)
       res.json({
         code: 400,
         message: "添加记录失败",
