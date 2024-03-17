@@ -62,7 +62,6 @@ router.post("/uploadImage", upload.single("file"), (req: any, res) => {
   const { file } = req as {
     file: multer.File
   }
-  console.log(file)
   const { path: filePath, filename: originFileName } = file
   const fileType = originFileName.split(".")[1]
   const imgId = randomUUID()

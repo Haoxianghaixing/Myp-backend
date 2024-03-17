@@ -59,7 +59,7 @@ router.get("/getPhotoDetail", (req, res) => {
         res.send(
           JSON.stringify({
             code: 200,
-            data: Object.assign((data as any)[0], r[0]),
+            data: Object.assign((data as any)[0], (r as any)[0]),
           })
         )
       })

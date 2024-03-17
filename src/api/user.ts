@@ -65,7 +65,26 @@ router.get("/getUserLikes", (req, res) => {
     id: string
   }
   query(
-    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE id = ? AND t.l = 1",
+    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE t.userId = ? AND t.l = 1",
+    [id]
+  ).then((r) => {
+    res.send(
+      JSON.stringify({
+        code: 200,
+        data: {
+          photoList: r,
+        },
+      })
+    )
+  })
+})
+
+router.get("/getUserCollections", (req, res) => {
+  const { id } = req.query as {
+    id: string
+  }
+  query(
+    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE t.userId = ? AND t.c = 1",
     [id]
   ).then((r) => {
     res.send(
