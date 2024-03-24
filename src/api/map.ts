@@ -29,8 +29,11 @@ router.get("/getAreaGeoDataById", (req, res) => {
       .then((data) => {
         res.send(
           JSON.stringify({
-            areaName,
-            data,
+            code: 200,
+            data: {
+              areaName,
+              jsonData: data,
+            },
           })
         )
       })
@@ -73,7 +76,9 @@ router.post("/uploadImage", upload.single("file"), (req: any, res) => {
       res.json({
         code: 200,
         message: "上传成功",
-        fileName: `myp/images/${fileName}`,
+        data: {
+          fileName: `myp/images/${fileName}`,
+        },
       })
     })
     .catch((err) => {
@@ -204,7 +209,9 @@ router.get("/getAreaList", (req, res) => {
   res.json({
     code: 200,
     message: "获取地区列表成功",
-    data: AreaList,
+    data: {
+      areaList: AreaList,
+    },
   })
 })
 
@@ -262,7 +269,9 @@ router.get("/getUserHotMap", (req, res) => {
       res.json({
         code: 200,
         message: "获取用户热图成功",
-        data,
+        data: {
+          hotMapData: data,
+        },
       })
     })
     .catch((err) => {
