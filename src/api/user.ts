@@ -33,11 +33,17 @@ export function decodeToken(token: string) {
 
 router.get("/getUserDetail", (req, res) => {
   const { id } = req.query
-  query("SELECT name, email, id FROM user WHERE id = ?", [id]).then((r) => {
+  query("SELECT * FROM user WHERE id = ?", [id]).then((r) => {
+    const result = (r as any[])[0]
+    delete result.password
+    result.desiredCities = result.desiredCities
+      ? result.desiredCities.split(",")
+      : ""
+    res.setHeader("cache-control", "no-cache")
     res.send(
       JSON.stringify({
         code: 200,
-        data: (r as UserInfo[])[0],
+        data: result,
       })
     )
   })
@@ -64,18 +70,33 @@ router.get("/getUserLikes", (req, res) => {
   const { id } = req.query as {
     id: string
   }
-  query(
-    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE t.userId = ? AND t.l = 1",
-    [id]
-  ).then((r) => {
-    res.send(
-      JSON.stringify({
-        code: 200,
-        data: {
-          photoList: r,
-        },
+  // 判断用户是否开启了显示喜欢
+  query("SELECT showLikes FROM user WHERE id = ?", [id]).then((r) => {
+    if ((r as any[])[0].showLikes === 0) {
+      res.send(
+        JSON.stringify({
+          code: 200,
+          data: {
+            disabled: true,
+            photoList: [],
+          },
+        })
+      )
+    } else {
+      query(
+        "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE t.userId = ? AND t.l = 1",
+        [id]
+      ).then((r) => {
+        res.send(
+          JSON.stringify({
+            code: 200,
+            data: {
+              photoList: r,
+            },
+          })
+        )
       })
-    )
+    }
   })
 })
 
@@ -83,18 +104,33 @@ router.get("/getUserCollections", (req, res) => {
   const { id } = req.query as {
     id: string
   }
-  query(
-    "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE t.userId = ? AND t.c = 1",
-    [id]
-  ).then((r) => {
-    res.send(
-      JSON.stringify({
-        code: 200,
-        data: {
-          photoList: r,
-        },
+  // 判断用户是否开启了显示收藏
+  query("SELECT showCollections FROM user WHERE id = ?", [id]).then((r) => {
+    if ((r as any[])[0].showCollections === 0) {
+      res.send(
+        JSON.stringify({
+          code: 200,
+          data: {
+            disabled: true,
+            photoList: [],
+          },
+        })
+      )
+    } else {
+      query(
+        "SELECT *, name as userName FROM img JOIN user ON img.userId = user.id JOIN imgActions as t ON t.photoId = img.photoId WHERE t.userId = ? AND t.c = 1",
+        [id]
+      ).then((r) => {
+        res.send(
+          JSON.stringify({
+            code: 200,
+            data: {
+              photoList: r,
+            },
+          })
+        )
       })
-    )
+    }
   })
 })
 
@@ -125,6 +161,23 @@ router.get("/getUserInfo", (req, res) => {
       })
     )
   }
+})
+
+router.post("/changeUserInfo", (req, res) => {
+  const { id, name, description, desiredCities, showLikes, showCollections } =
+    req.body
+  const desiredCitiesStr = desiredCities.join(",")
+  query(
+    "UPDATE user SET name = ?, description = ?, desiredCities = ?, showLikes = ?, showCollections = ? WHERE id = ?",
+    [name, description, desiredCitiesStr, showLikes, showCollections, id]
+  ).then((r) => {
+    res.send(
+      JSON.stringify({
+        code: 200,
+        message: "修改成功",
+      })
+    )
+  })
 })
 
 router.post("/login", (req, res) => {

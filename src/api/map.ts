@@ -168,7 +168,10 @@ router.get("/getAreaDetailById", (req, res) => {
 router.post("/addRecord", (req, res) => {
   const { areaId, fileList, takeDate, spot } = req.body as {
     areaId: string
-    fileList: string[]
+    fileList: {
+      fileName: string
+      ratio: number
+    }[]
     takeDate?: Date
     spot?: string
   }
@@ -176,16 +179,17 @@ router.post("/addRecord", (req, res) => {
   const { id } = decodeToken(token)
   const uploadDate = new Date()
   query(
-    "insert into img (userId, areaId, fileName, uploadDate, takeDate, spot, photoId) values ?",
+    "insert into img (userId, areaId, fileName, uploadDate, takeDate, spot, photoId, ratio) values ?",
     [
-      fileList.map((fileName) => [
+      fileList.map((file) => [
         id,
         areaId,
-        fileName,
+        file.fileName,
         uploadDate,
         takeDate ? takeDate : null,
         spot ?? null,
-        fileName.split("/")[2]!.split(".")[0],
+        file.fileName.split("/")[2]!.split(".")[0],
+        file.ratio,
       ]),
     ]
   )

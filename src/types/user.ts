@@ -3,6 +3,10 @@ export interface UserInfo {
   name: string
   email: string
   password: string
+  description?: string
+  desiredCities?: string[]
+  showLikes?: boolean
+  showCollections?: boolean
 }
 
 export interface IPicture {

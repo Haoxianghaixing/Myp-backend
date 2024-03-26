@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser"
 import { decodeToken } from "./user.js"
 import oss from "@/service/oss.js"
 import fs from "node:fs"
-import { fileBufferPath } from "@/constant/index.js"
 const router = express.Router()
 
 router.use(cookieParser())
